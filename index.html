@@ -12,8 +12,8 @@
     <title>Snap Talk</title>
   </head>
   <body>
-    <main class="container p-5 mt-5 shadow">
-      <h1 class="fw-bold mb-4">Snap Talk</h1>
+    <main class="container p-5 mt-3 pt-3 shadow">
+      <h1 class="fw-bold mb-2 text-center">Snap Talk</h1>
       <label for="user_name">Name:</label>
       <input
         id="user_name"
@@ -25,18 +25,12 @@
 
       <!-- Chat Section -->
       <section>
-        <div class="card mt-4">
-          <div class="card-body" id="message_area">
-            <div class="row">
-              <div class="col-md-6 offset-md-6">
-                <div class="alert bg-light shadow">
-                  <small class="fw-bold">John Doe</small>
-                  <br />
-                  <span>Some message here</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div
+          class="card mt-3"
+          style="overflow-y: scroll; height: 480px"
+          id="scroll_container"
+        >
+          <div class="card-body" id="message_area"></div>
         </div>
       </section>
 
@@ -68,7 +62,7 @@
         /></span>
       </p>
       <p class="mb-0">Developed by Brent Ross Habawel</p>
-      <p class="mb-0">©️2023</p>
+      <p class="mb-0" id="copyright"></p>
     </footer>
 
     <script type="module">
@@ -105,17 +99,49 @@
           document.getElementById("message_area").innerHTML = "";
           snapshot.forEach((message) => {
             // Inputting messages to the UI from Firebase
-            document.getElementById("message_area").innerHTML += `
+            if (
+              document.getElementById("user_name").value ===
+              message.data().sender
+            ) {
+              document.getElementById("message_area").innerHTML += `
                 <div class="row">
-                    <div class="col-md-6">
-                        <div class="alert bg-primary text-white shadow">
+                    <div class="col-md-6 offset-md-6">
+                        <div class="alert bg-light shadow">
                         <small class="fw-bold">${message.data().sender}</small>
                         <br />
                         <span>${message.data().message}</span>
                         </div>
+
+                        <small class="text-secondary float-md-end">${message
+                          .data()
+                          .timestamp.toDate()
+                          .toLocaleTimeString("en-US")}</small>
                     </div>
                 </div>
+                
             `;
+              // scrolls to the lowest or latest text
+              document.getElementById("message_area").scrollIntoView(false);
+            } else {
+              document.getElementById("message_area").innerHTML += `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="alert bg-primary text-white shadow mb-0">
+                            <small class="fw-bold">${
+                              message.data().sender
+                            }</small>
+                            <br />
+                            <span>${message.data().message}</span>
+                            </div>
+
+                            <small class="text-secondary">${message
+                              .data()
+                              .timestamp.toDate()
+                              .toLocaleTimeString("en-US")}</small>
+                        </div>
+                    </div>
+                `;
+            }
           });
         }
       );
@@ -136,9 +162,14 @@
             message: document.getElementById("message_content").value,
             timestamp: Timestamp.fromDate(new Date()),
           });
+
+          document.getElementById("message_content").value = "";
         }
-        document.getElementById("message_content").value = "";
       });
+
+      document.getElementById(
+        "copyright"
+      ).innerHTML = `©️ ${new Date().getFullYear()}`;
     </script>
   </body>
 </html>
